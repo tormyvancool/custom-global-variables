@@ -111,6 +111,7 @@ A foundational step toward long-term maintainability and clarity.
 * Admin UI improvements:
   - Comment field added to variable table
   - Usage guide updated to reflect new syntax
+  - Remove icon turned to red from light gray
 
 * Legacy syntax updated:
   Previously, variables were accessed via $GLOBALS['cgv']['name'].
