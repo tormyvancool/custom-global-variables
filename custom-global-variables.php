@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Custom Global Variables
- * Plugin URI: https://www.newtarget.com/solutions/wordpress-websites		<<< It seems not anylonger maintained by the original programmer
+ * Plugin Name:   Custom Global Variables
+ * Plugin URI:    https://www.newtarget.com/solutions/wordpress-websites	<<< It seems not anylonger maintained by the original programmer
  * Plugin GitHub: https://www.newtarget.com/solutions/wordpress-websites	<<< Not a GitHub repository.
  * Plugin GitHub: https://github.com/tormyvancool/custom-global-variables	<<< From version 2.0 on
  * Description: Easily create custom variables that can be accessed globally in WordPress and PHP. Now with comments per variable.
- * Version: 2.0.1
- * Author: new target, inc + Tormy Van Cool (improvements and versioning to 2.0)
+ * Version: 2.0.2
+ * Author: new target, inc + Tormy Van Cool (improvements and versioning to 2.0.x)
  * Author URI: https://www.newtarget.com
  * License: GPL2 or later
  */
@@ -69,6 +69,7 @@ class Custom_Global_Variables {
         $GLOBALS['CGV_META'] = $CGV_META;
 
         add_action('admin_menu', array($this, 'add_menu'));
+        add_action('admin_head', array($this, 'admin_styles'));
         
         add_shortcode('cgv', array($this, 'shortcode'));
         add_shortcode('cgv_comment', function($params) {
@@ -78,14 +79,37 @@ class Custom_Global_Variables {
     }
 
     function add_menu() {
-        add_submenu_page(
-            'options-general.php',
-            'Custom Global Variables',
+        add_menu_page(
+            'CUSTOM GLOBAL VARIABLES (2.0.2) by Tormy Van Cool',
             'Custom Global Variables',
             'manage_options',
             'custom-global-variables',
-            array($this, 'admin_page')
+            array($this, 'admin_page'),
+            'dashicons-list-view',
+            1
         );
+    }
+    
+    function admin_styles() {
+        echo '<style>
+            #toplevel_page_custom-global-variables a,
+            #toplevel_page_custom-global-variables a {
+                color: white !important;
+                font-weight: bold;
+                border-radius: 6px;
+                font-weight: bold;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+                transition: background-color 0.15s ease-in-out;
+                padding: 8px 12px;
+                margin-top: 5px;
+            }
+            #toplevel_page_custom-global-variables a {
+                background-color: #02766cff !important;
+            }
+            #toplevel_page_custom-global-variables a:hover {
+                background-color: #004de8ff !important;
+            }
+        </style>';
     }
 
     function admin_page() {
