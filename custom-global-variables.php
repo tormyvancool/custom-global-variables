@@ -1,26 +1,34 @@
 <?php
 /**
- * Plugin Name:   Custom Global Variables
- * Plugin URI:    https://www.newtarget.com/solutions/wordpress-websites	<<< It seems not anylonger maintained by the original programmer
- * Plugin GitHub: https://www.newtarget.com/solutions/wordpress-websites	<<< Not a GitHub repository.
- * Plugin GitHub: https://github.com/tormyvancool/custom-global-variables	<<< From version 2.0 on
- * Description: Easily create custom variables that can be accessed globally in WordPress and PHP. Now with comments per variable.
- * Version: 2.0.2
- * Author: new target, inc + Tormy Van Cool (improvements and versioning to 2.0.x)
- * Author URI: https://www.newtarget.com
- * License: GPL2 or later
+ * Plugin Name:   Custom Global Variables Pro (Free)
+ * Plugin GitHub: https://github.com/tormyvancool/custom-global-variables
+ * Description:   Easily create custom variables that can be accessed globally in WordPress and PHP with optional comments per variable.
+ * Version:       2.0.2
+ * Stable tag:    2.0.2
+ * Author:        Tormy Van Cool
+ * Author URI:    https://www.newtarget.com
+ * License:       GPL2 or later
+ * License URI:   https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:   custom-global-variables
+ * Requires PHP:  7.0
+ * Tested up to:  6.8
+ * Donate link:   https://www.paypal.com/donate?hosted_button_id=LZ6LLD2B7PGG2
  */
 
-class Custom_Global_Variables {
+class Custom_Global_Variables_Pro {
 
     private $file_path = '';
     private $folder_path = WP_CONTENT_DIR . '/custom-global-variables';
 
 
     function __construct() {
+
         $this->file_path = WP_CONTENT_DIR . '/custom-global-variables/' . md5(AUTH_KEY) . '.json';
 
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         $GLOBALS['cgv'] = [];
+
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         $GLOBALS['cgv_meta'] = [];
 
         if (file_exists($this->file_path)) {
@@ -30,42 +38,56 @@ class Custom_Global_Variables {
             if (is_array($decoded)) {
                 foreach ($decoded as $key => $data) {
                     if (is_array($data)) {
-                        $GLOBALS['cgv'][$key] = stripslashes($data['val'] ?? '');
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+                        $GLOBALS['cgv'][$key]      = stripslashes($data['val'] ?? '');
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                         $GLOBALS['cgv_meta'][$key] = stripslashes($data['comment'] ?? '');
                     } else {
-                        $GLOBALS['cgv'][$key] = stripslashes($data);
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+                        $GLOBALS['cgv'][$key]      = stripslashes($data);
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                         $GLOBALS['cgv_meta'][$key] = '';
                     }
                 }
             }
         } else {
+
             if (wp_mkdir_p(WP_CONTENT_DIR . '/custom-global-variables')) {
+
                 file_put_contents($this->file_path, '');
                 
-                // Add .htaccess protection
+                # Add .htaccess protection
                 $htaccess_path = $this->folder_path . '/.htaccess';
                 if (!file_exists($htaccess_path)) {
+                    
                     $rules = "Order deny,allow\nDeny from all";
+
                     @file_put_contents($htaccess_path, $rules);
-                    @chmod($htaccess_path, 0640);
+                    $wp_filesystem->chmod($htaccess_path, 0640);
                 }
 
-                // Optional: secure the folder itself
-                @chmod($this->folder_path, 0750);
-                @chmod($this->file_path, 0640);
+                # Optional: secure the folder itself
+                $wp_filesystem->chmod($this->folder_path, 0750);
+                $wp_filesystem->chmod($this->file_path,   0640);
             }
-            @chmod($this->folder_path, 0750); // Folder: owner read/write/execute, group read/execute
-            @chmod($this->file_path, 0640); // File: owner read/write, group read
+
+            $wp_filesystem->chmod($this->folder_path, 0750);   # Folder: owner read/write/execute, group read/execute
+            $wp_filesystem->chmod($this->file_path,   0640);   # File:   owner read/write, group read
         }
 
-        // Object exposure (unchanged)
+        # Object exposure (unchanged)
         $CGV = new stdClass();
         $CGV_META = new stdClass();
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         foreach ($GLOBALS['cgv'] as $key => $val) {
+
             $CGV->$key = $val;
             $CGV_META->$key = $GLOBALS['cgv_meta'][$key]?? '';
+
         }
-        $GLOBALS['CGV'] = $CGV;
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
+        $GLOBALS['CGV']      = $CGV;
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
         $GLOBALS['CGV_META'] = $CGV_META;
 
         add_action('admin_menu', array($this, 'add_menu'));
@@ -73,15 +95,19 @@ class Custom_Global_Variables {
         
         add_shortcode('cgv', array($this, 'shortcode'));
         add_shortcode('cgv_comment', function($params) {
+
             $param0 = sanitize_text_field($params[0]);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
             return isset($GLOBALS['cgv_meta'][$param0]) ? wp_kses_post($GLOBALS['cgv_meta'][$param0]) : '';
+
         });
+        // phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
     }
 
     function add_menu() {
         add_menu_page(
-            'CUSTOM GLOBAL VARIABLES (2.0.2) by Tormy Van Cool',
-            'Custom Global Variables',
+            'CUSTOM GLOBAL VARIABLES PRO (1.0.0) by Tormy Van Cool',
+            'Custom Global Variables Pro',
             'manage_options',
             'custom-global-variables',
             array($this, 'admin_page'),
@@ -93,7 +119,7 @@ class Custom_Global_Variables {
     function admin_styles() {
         echo '<style>
             #toplevel_page_custom-global-variables a,
-            #toplevel_page_custom-global-variables a {
+            #toplevel_page_custom-global-variables a { 
                 color: white !important;
                 font-weight: bold;
                 border-radius: 6px;
@@ -117,47 +143,55 @@ class Custom_Global_Variables {
             wp_die('You do not have sufficient permissions.');
         }
 
-        wp_enqueue_style('custom-global-variables-style', plugins_url('style.css', __FILE__) . '?v=' . time());
-        wp_enqueue_script('custom-global-variables-script', plugins_url('script.js', __FILE__), array('jquery'));
+        wp_enqueue_style( 'custom-global-variables-style',  plugins_url('style.css', __FILE__), array(), time());
+        wp_enqueue_script('custom-global-variables-script', plugins_url('script.js', __FILE__), array('jquery'), time(), true);
 
         $vars = $GLOBALS['cgv'];
         $comments = $GLOBALS['cgv_meta'];
 
-        if (isset($_POST['vars'])) {
-            if (!isset($_POST['cgv_nonce']) || !wp_verify_nonce($_POST['cgv_nonce'], 'cgv_nonce')) {
-                wp_die('You do not have sufficient permissions.');
-                return false;
-            }
+			if (isset($_POST['vars'])) {
+				$nonce = isset($_POST['cgv_nonce']) ? sanitize_key(wp_unslash($_POST['cgv_nonce'])) : '';
 
-            $vars_new = [];
+				if (!wp_verify_nonce($nonce, 'cgv_nonce')) {
+					wp_die('You do not have sufficient permissions.');
+					return false;
+				}
 
-            foreach ($_POST['vars'] as $var) {
-                $name = stripslashes(sanitize_textarea_field($var['name']));
-                $val = stripslashes(wp_kses_post($var['val']));
-                $comment = stripslashes(sanitize_textarea_field($var['comment']));
+				$posted_vars = sanitize_key(wp_unslash($_POST['vars']));
+				$vars_new = [];
 
-                if (!empty($name) && !empty($val)) {
-                    $key = trim(strtolower(str_replace(' ', '_', $name)));
-                    $vars_new[$key] = [
-                        'val' => $val,
-                        'comment' => $comment
-                    ];
-                }
-            }
+				foreach ((array) $posted_vars as $var) {
 
+					$name = sanitize_textarea_field($var['name'] ?? '');
+					$val = wp_kses_post($var['val'] ?? '');
+					$comment = sanitize_textarea_field($var['comment'] ?? '');
+
+					if (!empty($name) && !empty($val)) {
+						$key = trim(strtolower(str_replace(' ', '_', $name)));
+						$vars_new[$key] = array(
+							'val'     => $val,
+							'comment' => $comment
+							);
+					}
+				}
+				
             if (file_put_contents($this->file_path, json_encode($vars_new)) !== false) {
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                 $GLOBALS['cgv'] = [];
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                 $GLOBALS['cgv_meta'] = [];
                 foreach ($vars_new as $key => $data) {
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                     $GLOBALS['cgv'][$key] = $data['val'];
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                     $GLOBALS['cgv_meta'][$key] = $data['comment'];
                 }
                 echo '<div id="message" class="updated"><p>Your variables have successfully been saved.</p></div>';
             } else {
-                echo '<div id="message" class="error"><p>Your variables could not be saved. Check permissions on:</p><p><strong>' . WP_CONTENT_DIR . '/custom-global-variables</strong></p></div>';
+                echo '<div id="message" class="error"><p>Your variables could not be saved. Check permissions on:</p><p><strong>' . esc_html(WP_CONTENT_DIR) . '/custom-global-variables</strong></p></div>';
             }
         }
-        ?>
+		?>
 
         <div class="wrap">
             <h2>Custom Global Variables v2.0</h2>
@@ -169,12 +203,12 @@ class Custom_Global_Variables {
                 <p><code>[cgv_comment variable_name]</code> output: comment related to the variable</p>
                 <p>&nbsp</p>
                 <h4>ARRAYS</h4>
-                <p><code>&lt;?php echo $GLOBALS['cgv']['variable_name']; ?&gt;</code> output: value of the variable</p>
-                <p><code>&lt;?php echo $GLOBALS['cgv_meta']['variable_name']['comment']; ?&gt;</code> output: comment related to the variable</p>
+                <p><code>&lt;?php echo $GLOBALS['cgv_pro']['variable_name']; ?&gt;</code> output: value of the variable</p>
+                <p><code>&lt;?php echo $GLOBALS['cgv_meta_pro']['variable_name']['comment']; ?&gt;</code> output: comment related to the variable</p>
                 <p>&nbsp</p>
                 <h4>OBJECTS</h4>
-                <p><code>&lt;?php echo $CGV->variable_name; ?&gt;</code> output: value of the variable</p>
-                <p><code>&lt;?php echo $CGV_META->variable_name; ?&gt;</code> output: comment related to the variable</p>
+                <p><code>&lt;?php echo $CGV_PRO->variable_name; ?&gt;</code> output: value of the variable</p>
+                <p><code>&lt;?php echo $CGV_META_PRO->variable_name; ?&gt;</code> output: comment related to the variable</p>
             </div>
 
             <div class="card">
@@ -201,29 +235,29 @@ class Custom_Global_Variables {
                             ?>
                             <tr>
                                 <td class="variable">
-                                    <input name="vars[<?php echo $i ?>][name]" type="text" value="<?php echo esc_attr($key) ?>" placeholder="name" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][name]" type="text" value="<?php echo esc_attr($key) ?>" placeholder="name" autocomplete="off">
                                 </td>
                                 <td class="value">
-                                    <input name="vars[<?php echo $i ?>][val]" type="text" value="<?php echo esc_attr($value) ?>" placeholder="value" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][val]" type="text" value="<?php echo esc_attr($value) ?>" placeholder="value" autocomplete="off">
                                 </td>
                                 <td class="comment">
-                                    <input name="vars[<?php echo $i ?>][comment]" type="text" value="<?php echo esc_attr($comment) ?>" placeholder="comment (optional)" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][comment]" type="text" value="<?php echo esc_attr($comment) ?>" placeholder="comment (optional)" autocomplete="off">
                                 </td>
                                 <td class="options">
-                                    <img alt="delete" class="delete" src="<?php echo plugin_dir_url(__FILE__) ?>/delete.png">
+                                    <img alt="delete" class="delete" src="<?php echo esc_html(plugin_dir_url(__FILE__)); ?>/delete.png">
                                 </td>
                             </tr>
                             <?php $i++; endforeach; endif; ?>
 
                             <tr>
                                 <td class="variable">
-                                    <input name="vars[<?php echo $i ?>][name]" type="text" placeholder="name" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][name]" type="text" placeholder="name" autocomplete="off">
                                 </td>
                                 <td class="value">
-                                    <input name="vars[<?php echo $i ?>][val]" type="text" placeholder="value" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][val]" type="text" placeholder="value" autocomplete="off">
                                 </td>
                                 <td class="comment">
-                                    <input name="vars[<?php echo $i ?>][comment]" type="text" placeholder="comment (optional)" autocomplete="off">
+                                    <input name="vars[<?php echo esc_html($i); ?>][comment]" type="text" placeholder="comment (optional)" autocomplete="off">
                                 </td>
                                 <td class="options"></td>
                             </tr>
@@ -238,15 +272,15 @@ class Custom_Global_Variables {
         <?php
     }    function shortcode($params) {
         $param0 = sanitize_text_field($params[0]);
-        return isset($GLOBALS['cgv'][$param0]) ? wp_kses_post($GLOBALS['cgv'][$param0]) : '';
+        return isset($GLOBALS['cgv_pro'][$param0]) ? wp_kses_post($GLOBALS['cgv_pro'][$param0]) : '';
     }
 }
 
-$custom_global_variables = new Custom_Global_Variables;
+$custom_global_variables_pro = new Custom_Global_Variables_Pro;
 
-// Add "Settings" link in plugin list
+# Add "Settings" link in plugin list
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) {
-    $settings_link = '<a href="options-general.php?page=custom-global-variables">' . __('Settings') . '</a>';
+    $settings_link = '<a href="options-general.php?page=custom-global-variables">' . 'Settings' . '</a>';
     array_unshift($links, $settings_link);
     return $links;
 });
