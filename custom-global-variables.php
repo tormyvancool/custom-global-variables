@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:   Custom Global Variables Pro (Free)
+ * Plugin Name:   Custom Global Variables
  * Plugin GitHub: https://github.com/tormyvancool/custom-global-variables
  * Description:   Easily create custom variables that can be accessed globally in WordPress and PHP with optional comments per variable.
  * Version:       2.0.2
