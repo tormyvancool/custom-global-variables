@@ -32,13 +32,14 @@ and access them globally in WordPress and PHP. It avoids database calls for fast
 <br/><br/>
 ## **🔗 Original Plugin**
 You can find the original plugin on WordPress.org: https://wordpress.org/plugins/custom-global-variables/ but it's version 1.2.1
-<br/><br/><br/><br/>
+<br>
+
 ## **🧱 Comparison Table**
 
 |   | Access   | Description  | Output (just example)   |
 |---|---|---|---|
 | WP Shortcode Legacy  | `[cgv days]`   | Raw Value  | `8`  |
-| WP Shortcode  | `[cgv_comment days]  | Associated Comment  | `"Interval days..."`  |
+| WP Shortcode  | `[cgv_comment days]`  | Associated Comment  | `"Interval days..."`  |
 | PHP Array Legacy  | `$GLOBALS['cgv']['variable_name']`   | Raw Value  | `8`  |
 | PHP Array  | `$GLOBALS['cgv_meta']['variable_name']`  | Associated Comment  | `"Interval days..."`  |
 | PHP Object   | `$CGV->variable_name`   | Semantic value   | `8`  |
